@@ -1,4 +1,4 @@
-MARATHON_TAG := v1.6.352
+MARATHON_TAG := v1.6.496
 
 .PHONY: build-image
 build-image:
