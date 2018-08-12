@@ -1,45 +1,41 @@
-try {
-    node('slave') {
-        step([$class: 'WsCleanup'])
+pipeline {
+  agent {
+    label 'slave'
+  }
 
-        stage('check-out-code') {
-            checkout scm
-        }
+  options {
+    ansiColor('xterm')
+    timeout(time: 1, unit: 'HOURS')
+  }
 
-        stage('build-package') {
-            sh 'make build-package'
-            archiveArtifacts artifacts: "marathon/target/*.deb,marathon/target/*.changes"
-        }
-
-        stash 'build'
+  stages {
+    stage('build-package') {
+      steps {
+        sh 'make build-package'
+        archiveArtifacts artifacts: 'marathon/target/*.deb,marathon/target/*.changes'
+      }
     }
 
-    if (env.BRANCH_NAME == 'master') {
-        stage("upload-stretch") {
-            build job: 'upload-changes', parameters: [
-                [$class: 'StringParameterValue', name: 'path_to_changes', value: "marathon/target/*.changes"],
-                [$class: 'StringParameterValue', name: 'dist', value: 'stretch'],
-                [$class: 'StringParameterValue', name: 'job', value: env.JOB_NAME.replace('/', '/job/')],
-                [$class: 'StringParameterValue', name: 'job_build_number', value: env.BUILD_NUMBER],
-            ]
-        }
+    stage('upload-stretch') {
+      when {
+        branch 'master'
+      }
+      steps {
+        uploadChanges('stretch', 'marathon/target/*.changes')
+      }
     }
+  }
 
-} catch (err) {
-    def subject = "${env.JOB_NAME} - Build #${env.BUILD_NUMBER} - Failure!"
-    def message = "${env.JOB_NAME} (#${env.BUILD_NUMBER}) failed: ${env.BUILD_URL}"
-
-    if (env.BRANCH_NAME == 'master') {
-        slackSend color: '#FF0000', message: message
-        mail to: 'root@ocf.berkeley.edu', subject: subject, body: message
-    } else {
-        mail to: emailextrecipients([
-            [$class: 'CulpritsRecipientProvider'],
-            [$class: 'DevelopersRecipientProvider']
-        ]), subject: subject, body: message
+  post {
+    failure {
+      emailNotification()
     }
-
-    throw err
+    always {
+      node(label: 'slave') {
+        ircNotification()
+      }
+    }
+  }
 }
 
 // vim: ft=groovy
