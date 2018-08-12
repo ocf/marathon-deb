@@ -5,7 +5,7 @@ build-image:
 	docker build -t marathon-build .
 
 .PHONY: build-package
-build-package: build-image
+build-package: clean build-image
 	git clone https://github.com/mesosphere/marathon.git
 	cd marathon && git checkout ${MARATHON_TAG}
 	docker run -v $(CURDIR)/marathon:/opt/marathon:rw marathon-build
