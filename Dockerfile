@@ -20,6 +20,5 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY package.sh /tmp
-WORKDIR /opt/marathon
 
 CMD ["/tmp/package.sh"]

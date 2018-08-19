@@ -8,7 +8,7 @@ build-image:
 build-package: clean build-image
 	git clone https://github.com/mesosphere/marathon.git
 	cd marathon && git checkout ${MARATHON_TAG}
-	docker run -v $(CURDIR)/marathon:/opt/marathon:rw marathon-build
+	docker run -e "DIST_UID=$(shell id -u)" -e "DIST_GID=$(shell id -g)" -v $(CURDIR)/marathon:/mnt:rw marathon-build
 
 .PHONY: clean
 clean:
