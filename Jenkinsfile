@@ -26,6 +26,9 @@ pipeline {
       when {
         branch 'master'
       }
+      agent {
+        label 'deploy'
+      }
       steps {
         uploadChanges('stretch', 'marathon/target/*.changes')
       }
