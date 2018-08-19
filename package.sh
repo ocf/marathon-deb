@@ -17,4 +17,5 @@ for file in /opt/marathon/target/packages/systemd*.deb; do
   # different name for the package, but the correct checksums.
   install -o "$DIST_UID" -g "$DIST_GID" -d "/mnt/target/"
   install -o "$DIST_UID" -g "$DIST_GID" "$file" "/mnt/target/${file#*-}"
+  install -o "$DIST_UID" -g "$DIST_GID" /opt/marathon/target/*.changes "/mnt/target/"
 done
