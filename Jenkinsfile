@@ -9,6 +9,12 @@ pipeline {
   }
 
   stages {
+    stage('check-gh-trust') {
+      steps {
+        checkGitHubAccess()
+      }
+    }
+
     stage('build-package') {
       steps {
         sh 'make build-package'
